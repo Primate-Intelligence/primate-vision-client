@@ -28,3 +28,20 @@ jobs:
           echo "Brand scan clean."
       - name: Skeleton check
         run: test -f README.md && test -f LICENSE && test -f NOTICE && echo "skeleton ok"
+      # C2 clean-machine gate (wired pre-GA): install from a fresh checkout,
+      # typecheck, build the SPA, and boot the token-mint server. The live
+      # sandbox end-to-end (mint real pvct_ → upload fixture → analysis)
+      # activates at GA when the sandbox endpoint is on prod.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Clean-machine install + typecheck + build
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+          npm run build
+      - name: Token-mint server boots
+        run: |
+          PRIMATE_API_KEY=pv_test_ci_dummy PORT=3199 timeout 5 node server/mint.js &
+          sleep 2
+          curl -sf -X POST http://localhost:3199/api/token -o /dev/null -w "%{http_code}" | grep -qE "4..|2.." && echo "mint server responds"

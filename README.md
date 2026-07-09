@@ -2,44 +2,71 @@
 
 Open-source reference implementation of a [Primate Vision](https://primateintelligence.ai) video-analysis client. Built on [`@primate-intelligence/vision-react`](https://github.com/Primate-Intelligence/vision-react) and the Primate Vision public API v1.
 
-> **Status: pre-release skeleton.** Being built in the open (Day-0 open-sourcing) alongside Public API v1. Roadmap below tracks the API program's phases.
+Upload a video, ask a question in plain English, get a yes/no answer with confidence and clip timestamps.
 
-## What this will be
+## Quickstart
 
-Clone it, set **two environment variables**, and get a working video-QA web app against your own Primate Vision account:
+```bash
+git clone https://github.com/Primate-Intelligence/primate-vision-client
+cd primate-vision-client
+npm install
 
-| Runtime | Required | Optional (defaulted) |
+# Get a free test key (fixture results, no GPU, no billing):
+curl -X POST https://api.primateintelligence.ai/v1/sandbox
+
+PRIMATE_API_KEY=pv_test_… npm run dev
+# → web app on http://localhost:5173, token-mint server on :3001
+```
+
+Two environment variables, both on the server side:
+
+| Variable | Required | Purpose |
 |---|---|---|
-| Token-mint server | `PRIMATE_API_KEY` | `PRIMATE_API_BASE_URL` (default `https://api.primateintelligence.ai`) |
-| Client (browser) | — | `VITE_SHIM_BASE_URL` (default `/api/pv`) |
+| `PRIMATE_API_KEY` | yes | Your `pv_live_…` or `pv_test_…` secret key — **server only** |
+| `PRIMATE_API_BASE_URL` | no | Defaults to `https://api.primateintelligence.ai` |
 
-The browser never sees your secret key: a ~20-line server mints short-lived, scoped **client tokens** (`pvct_…`) and the SPA talks to Primate Vision directly.
+## How auth works (the part worth copying)
+
+The browser **never sees your secret key**. The primary browser-auth path is
+**ephemeral client tokens** (`pvct_…`):
+
+1. The SPA calls `POST /api/token` on your server.
+2. [`server/mint.js`](./server/mint.js) — the *entire* server, ~20 lines —
+   exchanges your secret key for a short-lived, scope-limited client token
+   via `POST /v1/client_tokens`.
+3. The SPA hands that token to the official SDK (`new Primate({ authToken })`),
+   which talks to the Primate Vision API directly.
+
+Tokens are scoped (`videos:write`, `analyses:read`, `analyses:write`), live
+15 minutes, and can be bound to a single video or stream. Revoking the parent
+key revokes every token it minted.
+
+## What's in the box
+
+- `server/mint.js` — the token-mint server (express, ~20 lines)
+- `src/main.tsx` — SDK client setup with token caching
+- `src/App.tsx` — upload → analyze → results UI using
+  `useVideoAnalysis`, `<AnalysisProgress />`, `<ClipsTimeline />`
+- Neutral styling on purpose: this is a teaching artifact, not a brand asset
 
 ## Roadmap
 
 - [x] Repo skeleton: license, CI scans, token-mint server stub
-- [ ] Minimal upload → analyze → result flow (API program P3)
-- [ ] Client-token mint + direct-from-browser flow (P5)
-- [ ] Real-time streaming view (P6)
-- [ ] Full reference UI via `@primate-intelligence/vision-react` (P10)
-- [ ] Clean-machine quickstart CI gate — clone → 2 env vars → `npm run dev` (GA)
+- [x] Minimal upload → analyze → result flow
+- [x] Client-token mint + direct-from-browser flow (primary auth path)
+- [x] Reference UI via `@primate-intelligence/vision-react`
+- [ ] Real-time streaming view (`connectStream` from the SDK)
+- [ ] Clean-machine quickstart CI gate against the live sandbox (GA)
 
-## Token-mint server (design target)
+> **Pre-GA note:** until the npm publishes land, the SDK and vision-react
+> packages are vendored as tarballs in `vendor/` (packed from their public
+> repos). At GA these become registry semver deps — same code.
 
-```js
-// server/mint.js — the entire server component
-import express from "express";
-const app = express();
-app.post("/api/pv/client-token", async (_req, res) => {
-  const r = await fetch(`${process.env.PRIMATE_API_BASE_URL ?? "https://api.primateintelligence.ai"}/v1/client_tokens`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${process.env.PRIMATE_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ scopes: ["videos:write", "analyses:write", "analyses:read"], ttl_s: 300 })
-  });
-  res.status(r.status).json(await r.json());
-});
-app.listen(3001);
-```
+## Support posture
+
+Issues welcome; PRs reviewed best-effort; security reports to
+security@primateintelligence.ai. This is a teaching artifact, not a supported
+product — no SLA.
 
 ## License
 
