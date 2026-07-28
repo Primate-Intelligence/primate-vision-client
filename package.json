@@ -2,7 +2,7 @@
   "name": "primate-vision-client",
   "private": true,
   "version": "0.1.0",
-  "description": "Open-source reference client for the Primate Vision public API — upload a video, ask a question, see the answer.",
+  "description": "Open-source reference client for the Primate Vision public API \u2014 upload a video, ask a question, see the answer.",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
@@ -14,8 +14,8 @@
     "test": "tsc -b --noEmit && echo 'typecheck clean'"
   },
   "dependencies": {
-    "@primate-intelligence/sdk": "file:vendor/primate-intelligence-sdk-0.1.0.tgz",
-    "@primate-intelligence/vision-react": "file:vendor/primate-intelligence-vision-react-0.1.0.tgz",
+    "@primate-intelligence/sdk": "file:vendor/primate-intelligence-sdk-0.2.0.tgz",
+    "@primate-intelligence/vision-react": "file:vendor/primate-intelligence-vision-react-0.1.1.tgz",
     "express": "^4.21.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
