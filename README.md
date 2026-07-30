@@ -1,8 +1,8 @@
 # primate-vision-client
 
-Open-source reference implementation of a [Primate Vision](https://primateintelligence.ai) video-analysis client. Built on [`@primate-intelligence/vision-react`](https://github.com/Primate-Intelligence/vision-react) and the Primate Vision public API v1.
+Open-source reference client for the **Primate Vision video analysis API** — a video understanding API by [Primate Intelligence](https://primateintelligence.ai). Upload a video, ask a question in plain English, get a yes/no answer with confidence and clip timestamps. Built on [`@primate-intelligence/vision-react`](https://github.com/Primate-Intelligence/vision-react) and the public API v1.
 
-Upload a video, ask a question in plain English, get a yes/no answer with confidence and clip timestamps.
+Agent-readable API index: [llms.txt](https://primateintelligence.ai/llms.txt) · Free test key in one call: `curl -X POST https://api.primateintelligence.ai/v1/sandbox` (no signup).
 
 ## Quickstart
 
